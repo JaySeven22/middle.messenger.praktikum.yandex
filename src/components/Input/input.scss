@@ -1,0 +1,64 @@
+/* ===== Компонент Input ===== */
+
+$input-border: #3369F3;
+$input-error: #E53935;
+$label-color: #999;
+$text-color: #1a1a1a;
+
+.input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  max-width: 420px;
+  text-align: left;
+
+  &__label {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: $label-color;
+    line-height: 1;
+    padding-left: 0;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 8px 0;
+    font-size: 1rem;
+    font-family: inherit;
+    color: $text-color;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    outline: none;
+    transition: border-color 0.2s, color 0.2s;
+    box-sizing: border-box;
+
+    &::placeholder {
+      color: #bbb;
+    }
+
+    &:focus {
+      border-bottom-color: $input-border;
+    }
+  }
+
+  &__error {
+    font-size: 0.75rem;
+    color: $input-error;
+    margin-top: 2px;
+    line-height: 1.2;
+  }
+
+  /* ===== Состояние ошибки ===== */
+  &--error {
+    .input-field__input {
+      color: $input-error;
+      border-bottom-color: $input-error;
+
+      &:focus {
+        border-bottom-color: $input-error;
+      }
+    }
+  }
+}
