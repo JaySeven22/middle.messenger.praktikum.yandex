@@ -5,7 +5,7 @@
 
 ## Дизайн
 
-[Макет в Figma](https://www.figma.com/file/) *(ссылка будет добавлена позже)*
+[Макет в Figma](https://www.figma.com/design/jF5fFFzgGOxQeB4CmKWTiE/Chat_external_link?node-id=0-1&t=acLSkgxvZKVJaekD-0)
 
 ## Функциональность
 
@@ -28,14 +28,14 @@
 
 ```bash
 # Клонировать репозиторий
-git clone https://github.com/<your-username>/middle.messenger.praktikum.yandex.git
+git clone https://github.com/JaySeven22/middle.messenger.praktikum.yandex.git
 cd middle.messenger.praktikum.yandex
 
 # Установить зависимости
 npm install
 
-# Запустить dev-сервер (по умолчанию http://localhost:8000)
-npm run dev
+# Запустить dev-сервер (по умолчанию http://localhost:3000)
+npm run start
 
 # Собрать проект для продакшена
 npm run build
@@ -67,5 +67,5 @@ src/
 
 ## Netlify
 
-Развёрнутое приложение: *(ссылка будет добавлена после деплоя)*
+Развёрнутое приложение: *(https://69b1d9c9426f7f0ddea7eb8d--stirring-smakager-3c2331.netlify.app/)*
 

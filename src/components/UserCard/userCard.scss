@@ -1,0 +1,109 @@
+.user-card {
+  display: flex;
+  width: 310px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid #e5e5e5;
+
+  &:hover {
+    background: #f0f0f0;
+  }
+
+  &--active {
+    background: #d4e4f7;
+
+    &:hover {
+      background: #c6dbf2;
+    }
+  }
+
+  &__avatar {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #9ea4b0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  &__avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &__avatar-letter {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__name {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: #1a1a1a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+  }
+
+  &__time {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    color: #999;
+  }
+
+  &__message {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #999;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    text-align: start;
+    min-width: 0;
+  }
+
+  &__message-own {
+    color: #1a1a1a;
+    font-weight: 500;
+  }
+
+  &__badge {
+    flex-shrink: 0;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: #3b7ddb;
+    color: #fff;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
