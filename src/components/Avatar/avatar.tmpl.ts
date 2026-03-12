@@ -1,23 +1,23 @@
 // src — URL картинки (опционально, без неё будет серый круг)
 // name — имя под аватаром (опционально)
-// width / height — размер (по умолчанию 130px)
+// size — модификатор размера (опционально, например "sm")
 // disabled — если true, оверлей при наведении не показывается
 export const avatarTemplate = `
   <div>
-    <div class="avatar {{#unless disabled}}avatar--interactive{{/unless}}"
-      style="width: {{or width "130"}}px; height: {{or height "130"}}px;"
-    >
+    <div class="avatar {{#if size}}avatar--{{size}}{{/if}} {{#if disabled}}{{else}}avatar--interactive{{/if}}">
       {{#if src}}
         <img class="avatar__image" src="{{src}}" alt="{{or name "avatar"}}" />
       {{else}}
-        <div class="avatar__placeholder" ></div>
+        <div class="avatar__placeholder"></div>
       {{/if}}
 
-      {{#unless disabled}}
+      {{#if disabled}}
+      {{else}}
         <div class="avatar__overlay">
-          <span class="avatar__overlay-text">Поменять<br>аватар</span>
+          <p class="avatar__overlay-text">Поменять</p>
+          <p class="avatar__overlay-text">аватар</p>
         </div>
-      {{/unless}}
+      {{/if}}
     </div>
     
     {{#if name}}

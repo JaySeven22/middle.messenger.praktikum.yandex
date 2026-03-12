@@ -1,11 +1,10 @@
-/* ===== Компонент Button ===== */
-
 $btn-primary: #3369F3;
 
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
   font-family: inherit;
   font-size: 0.9375rem;
   font-weight: 500;
@@ -21,9 +20,9 @@ $btn-primary: #3369F3;
     transform: scale(0.98);
   }
 
-  /* ---------- Закрашенная ---------- */
   &--filled {
-    padding: 14px 32px;
+    height: 44px;
+    padding: 0 32px;
     border-radius: 8px;
     background-color: $btn-primary;
     color: #fff;
@@ -38,8 +37,8 @@ $btn-primary: #3369F3;
     }
   }
 
-  /* ---------- Ссылка ---------- */
   &--link {
+    height: auto;
     padding: 8px 4px;
     border-radius: 4px;
     background: none;

@@ -1,13 +1,17 @@
 export const loginPageTemplate = `
-<div class="login-page">
+<main class="login-page">
   {{#> card}}
-    <h2 style="text-align: center; margin: 0 0 24px;">Вход</h2>
-    {{> input label="Логин" placeholder="ivanivanov" name="login"}}
-    {{> input label="Пароль" placeholder="Введите пароль" name="password" type="password"}}
-    <div style="margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-      {{> button id="login-button" label="Авторизоваться" variant="filled" height="40px"}}
-      {{> button id="register-button" label="Нет аккаунта?" variant="link" height="40px"}}
-    </div>
+    <form class="login-page__form" action="#" method="post">
+      <h1 class="login-page__title">Вход</h1>
+      <div class="login-page__fields">
+        {{> input label="Логин" placeholder="ivanivanov" name="login"}}
+        {{> input label="Пароль" placeholder="Введите пароль" name="password" type="password"}}
+      </div>
+      <div class="login-page__actions">
+        {{> button id="login-button" label="Авторизоваться" variant="filled" type="submit"}}
+        {{> button id="register-button" label="Нет аккаунта?" variant="link"}}
+      </div>
+    </form>
   {{/card}}
-</div>
+</main>
 `;

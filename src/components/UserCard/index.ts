@@ -1,8 +1,7 @@
 import Handlebars from 'handlebars';
 import { userCardTemplate } from './userCard.tmpl';
 
-// Регистрируем UserCard как partial — теперь его можно вызывать из любого шаблона
-// через {{> userCard}}
+
 Handlebars.registerPartial('userCard', userCardTemplate);
 
 // Регистрируем хелпер для вычисляемых полей

@@ -34,7 +34,7 @@ cd middle.messenger.praktikum.yandex
 # Установить зависимости
 npm install
 
-# Запустить dev-сервер (по умолчанию http://localhost:8000)
+# Запустить dev-сервер (по умолчанию http://localhost:3000)
 npm run start
 
 # Собрать проект для продакшена
