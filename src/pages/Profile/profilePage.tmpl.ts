@@ -66,8 +66,8 @@ export default class ProfilePage extends Block<ProfilePageProps> {
   protected events = {
     submit: (e: Event) => {
       e.preventDefault();
-      const { onNavigate: _, __children: _c, __refs: _r, ...profileData } = this.props;
-      console.log('Profile form:', profileData);
+      const { email, login, firstName, secondName, displayName, phone } = this.props;
+      console.log('Profile form:', { email, login, firstName, secondName, displayName, phone });
       this.props.onNavigate?.('chat');
     },
   };

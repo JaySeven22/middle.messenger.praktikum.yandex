@@ -3,6 +3,7 @@ import type {HelperOptions} from 'handlebars';
 
 let uniqueId = 0;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function registerComponent(Component: any) {
   const dataAttribute = `data-component-hbs-id="${++uniqueId}"`;
   
