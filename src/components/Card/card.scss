@@ -1,0 +1,12 @@
+.card {
+  width: 340px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 40px 30px;
+  box-sizing: border-box;
+
+  &--wide {
+    width: 420px;
+  }
+}

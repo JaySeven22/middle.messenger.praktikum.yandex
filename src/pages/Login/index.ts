@@ -1,0 +1,1 @@
+export { loginPageTemplate as LoginPage } from './loginPage.tmpl';
