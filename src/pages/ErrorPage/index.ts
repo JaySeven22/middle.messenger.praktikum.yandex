@@ -1,1 +1,1 @@
-export { errorPageTemplate as ErrorPage } from './errorPage.tmpl';
+export { default as ErrorPage } from './errorPage.tmpl';

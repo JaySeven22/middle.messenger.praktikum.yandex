@@ -1,5 +1,6 @@
-import Handlebars from 'handlebars';
-import { inputTemplate } from './input.tmpl';
+import { registerComponent } from '../../framework/componentRegister';
+import Input from './input.tmpl';
 
-Handlebars.registerPartial('input', inputTemplate);
+registerComponent(Input);
 
+export default Input;

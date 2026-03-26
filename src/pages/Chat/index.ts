@@ -1,1 +1,1 @@
-export { chatPageTemplate as ChatPage } from './chat.tmpl';
+export { default as ChatPage } from './chat.tmpl';

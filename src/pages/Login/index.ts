@@ -1,1 +1,1 @@
-export { loginPageTemplate as LoginPage } from './loginPage.tmpl';
+export { default as LoginPage } from './loginPage.tmpl';

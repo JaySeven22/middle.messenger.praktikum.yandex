@@ -1,1 +1,1 @@
-export { registerPageTemplate as RegisterPage } from './registerPage.tmpl';
+export { default as RegisterPage } from './registerPage.tmpl';
