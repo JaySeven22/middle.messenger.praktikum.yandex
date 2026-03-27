@@ -9,7 +9,9 @@ import './pages/Login/loginPage.scss';
 import './pages/Register/registerPage.scss';
 import './pages/Chat/chat.scss';
 import './pages/Profile/profilePage.scss';
+import './pages/ProfileEdit/profileEditPage.scss';
 import './pages/ErrorPage/errorPage.scss';
+import './pages/PasswordEdit/passwordEditPage.scss';
 
 import './framework/helpers';
 

@@ -32,7 +32,7 @@ export default class ChatPage extends Block<ChatPageProps> {
     <div class="chat-page">
       <nav class="chat-page__sidebar" aria-label="Список чатов">
         <header class="chat-page__sidebar-header">
-          <a ref="profileLink" class="chat-page__profile-link" href="#">Профиль &rsaquo;</a>
+          <a class="chat-page__profile-link" href="#">Профиль &rsaquo;</a>
           {{SearchInput placeholder="Поиск"}}
         </header>
         <ul class="chat-page__contacts" role="list">
@@ -84,7 +84,7 @@ export default class ChatPage extends Block<ChatPageProps> {
           </section>
 
           <footer class="chat-page__compose">
-            <form ref="messageForm" class="chat-page__compose-form">
+            <form class="chat-page__compose-form">
               <input
                 class="chat-page__compose-input"
                 type="text"
@@ -108,35 +108,36 @@ export default class ChatPage extends Block<ChatPageProps> {
     </div>
   `;
 
-  protected componentDidMount() {
-    this.refs.profileLink?.addEventListener('click', (e) => {
-      e.preventDefault();
-      this.props.onNavigate?.('profile');
-    });
-
-    const messageInput = this.element()?.querySelector<HTMLInputElement>(
-      '.chat-page__compose-input',
-    );
-
-    if (messageInput) {
-      messageInput.addEventListener('focus', () => {
+  protected events = {
+    click: (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.chat-page__profile-link')) {
+        e.preventDefault();
+        this.props.onNavigate?.('profile');
+      }
+    },
+    focusin: (e: Event) => {
+      const target = e.target as HTMLElement;
+      const messageInput = target.closest<HTMLInputElement>('.chat-page__compose-input');
+      if (messageInput) {
         messageInput.classList.remove('chat-page__compose-input--error');
-      });
+      }
+    },
+    focusout: (e: Event) => {
+      const target = e.target as HTMLElement;
+      const messageInput = target.closest<HTMLInputElement>('.chat-page__compose-input');
+      if (!messageInput || messageInput.value.trim()) return;
+      const error = validateField('message', messageInput.value);
+      if (error) {
+        messageInput.classList.add('chat-page__compose-input--error');
+      }
+    },
+    submit: (e: Event) => {
+      const form = e.target as HTMLFormElement;
+      if (!form.classList.contains('chat-page__compose-form')) return;
 
-      messageInput.addEventListener('blur', () => {
-        if (messageInput.value.trim()) return;
-        const error = validateField('message', messageInput.value);
-        if (error) {
-          messageInput.classList.add('chat-page__compose-input--error');
-        }
-      });
-    }
-
-    this.refs.messageForm?.addEventListener('submit', (e) => {
       e.preventDefault();
-      const input = (e.target as HTMLFormElement).querySelector<HTMLInputElement>(
-        'input[name="message"]',
-      );
+      const input = form.querySelector<HTMLInputElement>('input[name="message"]');
       if (!input) return;
 
       const error = validateField('message', input.value);
@@ -147,7 +148,7 @@ export default class ChatPage extends Block<ChatPageProps> {
 
       input.classList.remove('chat-page__compose-input--error');
       console.log('Message:', input.value);
-      (e.target as HTMLFormElement).reset();
-    });
-  }
+      form.reset();
+    },
+  };
 }

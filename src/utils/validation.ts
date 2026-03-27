@@ -92,18 +92,28 @@ export function validateForm(form: HTMLFormElement): {
   return { isValid, data };
 }
 
-export function attachBlurValidation(container: Element) {
-  container
-    .querySelectorAll<HTMLInputElement>('input[name]')
-    .forEach((input) => {
-      input.addEventListener('focus', () => clearFieldError(input));
+function getValidationInput(event: Event): HTMLInputElement | null {
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement)) return null;
+  if (!target.name) return null;
+  return target;
+}
 
-      input.addEventListener('blur', () => {
-        const form = input.closest('form') as HTMLFormElement | null;
-        const error = validateField(input.name, input.value, form ?? undefined);
-        if (error) {
-          showFieldError(input, error);
-        }
-      });
-    });
+export function handleValidationFocus(event: Event) {
+  const input = getValidationInput(event);
+  if (!input) return;
+  clearFieldError(input);
+}
+
+export function handleValidationBlur(event: Event) {
+  const input = getValidationInput(event);
+  if (!input) return;
+
+  const form = input.closest('form') as HTMLFormElement | null;
+  const error = validateField(input.name, input.value, form ?? undefined);
+  if (error) {
+    showFieldError(input, error);
+  } else {
+    clearFieldError(input);
+  }
 }

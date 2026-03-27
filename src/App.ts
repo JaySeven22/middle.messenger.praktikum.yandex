@@ -3,7 +3,9 @@ import { LoginPage } from './pages/Login';
 import { RegisterPage } from './pages/Register';
 import { ChatPage } from './pages/Chat';
 import { ProfilePage } from './pages/Profile';
+import { ProfileEditPage } from './pages/ProfileEdit';
 import { ErrorPage } from './pages/ErrorPage';
+import { PasswordEditPage } from './pages/PasswordEdit';
 
 export default class App {
   private appElement: HTMLElement;
@@ -50,7 +52,26 @@ export default class App {
           firstName: 'Иван',
           secondName: 'Иванов',
           displayName: 'Иван',
-          phone: '+7 (909) 967 30 30',
+          phone: '+79099673030',
+          onNavigate: navigate,
+        });
+        break;
+      case 'profileEdit':
+        page = new ProfileEditPage({
+          email: 'pochta@yandex.ru',
+          login: 'ivanivanov',
+          firstName: 'Иван',
+          secondName: 'Иванов',
+          displayName: 'Иван',
+          phone: '+79099673030',
+          onNavigate: navigate,
+        });
+        break;
+      case 'passwordEdit':
+        page = new PasswordEditPage({
+          passwordOld: '123456',
+          passwordNew: '123456',
+          passwordNewRepeat: '123456',
           onNavigate: navigate,
         });
         break;

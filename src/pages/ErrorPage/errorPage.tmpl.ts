@@ -17,7 +17,7 @@ export default class ErrorPage extends Block<ErrorPageProps> {
       <section class="error-page__card">
         <h1 class="error-page__code">{{code}}</h1>
         <p class="error-page__message">{{message}}</p>
-        <a ref="backLink" class="error-page__link" href="#">
+        <a class="error-page__link" href="#">
           {{or linkText "Назад к чатам"}}
         </a>
       </section>
@@ -33,10 +33,13 @@ export default class ErrorPage extends Block<ErrorPageProps> {
     });
   }
 
-  protected componentDidMount() {
-    this.refs.backLink?.addEventListener('click', (e) => {
-      e.preventDefault();
-      this.props.onNavigate?.('');
-    });
-  }
+  protected events = {
+    click: (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.error-page__link')) {
+        e.preventDefault();
+        this.props.onNavigate?.('');
+      }
+    },
+  };
 }

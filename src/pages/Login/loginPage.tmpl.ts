@@ -1,6 +1,10 @@
 import Block from '../../framework/block';
 import type { BlockOwnProps } from '../../framework/block';
-import { validateForm, attachBlurValidation } from '../../utils/validation';
+import {
+  validateForm,
+  handleValidationFocus,
+  handleValidationBlur,
+} from '../../utils/validation';
 
 interface LoginPageProps extends BlockOwnProps {
   onNavigate?: (page: string) => void;
@@ -36,14 +40,13 @@ export default class LoginPage extends Block<LoginPageProps> {
         this.props.onNavigate?.('chat');
       }
     },
+    click: (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('.button--link')) {
+        this.props.onNavigate?.('register');
+      }
+    },
+    focusin: handleValidationFocus,
+    focusout: handleValidationBlur,
   };
-
-  protected componentDidMount() {
-    const el = this.element();
-    if (el) attachBlurValidation(el);
-
-    this.refs.registerButton?.addEventListener('click', () => {
-      this.props.onNavigate?.('register');
-    });
-  }
 }
