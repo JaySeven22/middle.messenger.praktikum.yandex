@@ -1,5 +1,6 @@
-import Handlebars from 'handlebars';
-import { searchInputTemplate } from './searchInput.tmpl';
+import { registerComponent } from '../../framework/componentRegister';
+import SearchInput from './searchInput.tmpl';
 
-Handlebars.registerPartial('searchInput', searchInputTemplate);
+registerComponent(SearchInput);
 
+export default SearchInput;

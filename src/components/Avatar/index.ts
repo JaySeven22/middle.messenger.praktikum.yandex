@@ -1,5 +1,6 @@
-import Handlebars from 'handlebars';
-import { avatarTemplate } from './avatar.tmpl';
+import { registerComponent } from '../../framework/componentRegister';
+import Avatar from './avatar.tmpl';
 
-Handlebars.registerPartial('avatar', avatarTemplate);
+registerComponent(Avatar);
 
+export default Avatar;
