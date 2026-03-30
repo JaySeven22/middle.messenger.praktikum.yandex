@@ -1,8 +1,6 @@
-import Handlebars from 'handlebars';
-import { buttonTemplate } from './button.tmpl';
+import { registerComponent } from '../../framework/componentRegister';
+import Button from './button.tmpl';
 
-if (!Handlebars.helpers['or']) {
-  Handlebars.registerHelper('or', (a: unknown, b: unknown) => a || b);
-}
+registerComponent(Button);
 
-Handlebars.registerPartial('button', buttonTemplate);
+export default Button;

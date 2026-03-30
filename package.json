@@ -6,16 +6,30 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "lint:css": "stylelint **/*.css",
+    "lint:css:fix": "stylelint --fix **/*.css"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^25.4.0",
+    "eslint": "^10.1.0",
+    "globals": "^17.4.0",
+    "jiti": "^2.6.1",
     "sass": "^1.98.0",
+    "stylelint": "^17.6.0",
+    "stylelint-config-standard": "^40.0.0",
     "typescript": "~5.9.3",
+    "typescript-eslint": "^8.57.2",
     "vite": "^7.3.1"
   },
   "dependencies": {
     "dotenv": "^17.3.1",
     "handlebars": "^4.7.8"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

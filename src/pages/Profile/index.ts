@@ -1,1 +1,1 @@
-export { profilePageTemplate as ProfilePage } from './profilePage.tmpl';
+export { default as ProfilePage } from './profilePage.tmpl';
