@@ -21,9 +21,8 @@ import './components/Avatar';
 import './components/UserCard';
 import './components/SearchInput';
 
-import App from './App';
+import { initRouter } from './App';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const app = new App();
-  app.render();
+  initRouter();
 });

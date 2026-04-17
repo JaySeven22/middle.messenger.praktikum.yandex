@@ -1,6 +1,9 @@
 import Block from '../../framework/block';
 import type { BlockOwnProps } from '../../framework/block';
 import { validateField } from '../../utils/validation';
+import connect from '../../utils/connectToStore';
+import type { Indexed } from '../../utils/merge';
+
 
 interface ChatPageProps extends BlockOwnProps {
   users?: {
@@ -23,9 +26,10 @@ interface ChatPageProps extends BlockOwnProps {
     }[];
   };
   onNavigate?: (page: string) => void;
+  
 }
 
-export default class ChatPage extends Block<ChatPageProps> {
+class ChatPage extends Block<ChatPageProps> {
   static componentName = 'ChatPage';
 
   protected template = `
@@ -35,6 +39,22 @@ export default class ChatPage extends Block<ChatPageProps> {
           <a class="chat-page__profile-link" href="#">Профиль &rsaquo;</a>
           {{SearchInput placeholder="Поиск"}}
         </header>
+        <div class="chat-page__api-panel">
+          {{#if chat.loading}}
+            <p class="chat-page__api-status">Загрузка данных…</p>
+          {{/if}}
+          {{#if chat.error}}
+            <p class="chat-page__api-status chat-page__api-status--error">{{chat.error}}</p>
+          {{/if}}
+          {{#if chat.demo}}
+            <div class="chat-page__api-demo">
+              <p class="chat-page__api-demo-label">Из store (ответ API):</p>
+              <p class="chat-page__api-demo-row"><span>id</span> {{chat.demo.id}}</p>
+              <p class="chat-page__api-demo-row"><span>title</span> {{chat.demo.title}}</p>
+              <p class="chat-page__api-demo-body">{{chat.demo.body}}</p>
+            </div>
+          {{/if}}
+        </div>
         <ul class="chat-page__contacts" role="list">
           {{#each users}}
             <li role="listitem">
@@ -152,3 +172,5 @@ export default class ChatPage extends Block<ChatPageProps> {
     },
   };
 }
+
+export default connect((state: Indexed) => state)(ChatPage as typeof Block);

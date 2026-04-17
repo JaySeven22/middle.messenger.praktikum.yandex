@@ -1,5 +1,6 @@
 import Block from '../../framework/block';
 import type { BlockOwnProps } from '../../framework/block';
+import ProfilePageAPI from './profile.api';
 
 interface ProfilePageProps extends BlockOwnProps {
   email?: string;
@@ -96,7 +97,14 @@ export default class ProfilePage extends Block<ProfilePageProps> {
       }
 
       if (action === 'logout') {
-        this.props.onNavigate?.('');
+        const profileAPI = new ProfilePageAPI();
+        profileAPI.logout()
+        .then(() => {
+          this.props.onNavigate?.('');
+        }).catch((err: any) => {
+          window.alert('Произошла ошибка при выходе из аккаунта');
+          console.log(err)
+        })
       }
     },
   };

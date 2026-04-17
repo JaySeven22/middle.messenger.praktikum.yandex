@@ -5,6 +5,7 @@ import {
   handleValidationFocus,
   handleValidationBlur,
 } from '../../utils/validation';
+import LoginPageAPI, { type LoginFormData } from './login.api';
 
 interface LoginPageProps extends BlockOwnProps {
   onNavigate?: (page: string) => void;
@@ -37,7 +38,18 @@ export default class LoginPage extends Block<LoginPageProps> {
       const { isValid, data } = validateForm(e.target as HTMLFormElement);
       if (isValid) {
         console.log('Login form:', data);
-        this.props.onNavigate?.('chat');
+        const loginFormData: LoginFormData = {
+          login: data.login,
+          password: data.password,
+        };
+        const loginAPI = new LoginPageAPI();
+        loginAPI.signIn(loginFormData)
+        .then(() => {
+          this.props.onNavigate?.('chat');
+        }).catch(err => {
+          window.alert('Произошла ошибка при авторизации');
+          console.log(err)
+        })
       }
     },
     click: (e: Event) => {
