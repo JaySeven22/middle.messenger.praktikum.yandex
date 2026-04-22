@@ -1,11 +1,11 @@
+import { API_HOST as HOST } from './env';
+
 const METHODS = {
   GET: 'GET',
   POST: 'POST',
   PUT: 'PUT',
   DELETE: 'DELETE',
 };
-
-const HOST = 'https://ya-praktikum.tech';
     
 function queryStringify(data: Record<string, string | number | boolean | null | undefined>): string {
   if (typeof data !== 'object' || data === null) {

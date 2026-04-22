@@ -1,15 +1,11 @@
 import Block from '../../framework/block';
-import type { BlockOwnProps } from '../../framework/block';
 import {
   validateForm,
   handleValidationFocus,
   handleValidationBlur,
 } from '../../utils/validation';
-import RegisterPageAPI, { type RegisterFormData } from './register.api';
-
-interface RegisterPageProps extends BlockOwnProps {
-  onNavigate?: (page: string) => void;
-}
+import RegisterPageAPI from './register.api';
+import type { RegisterFormData, RegisterPageProps } from '../../entities/Auth';
 
 export default class RegisterPage extends Block<RegisterPageProps> {
   static componentName = 'RegisterPage';

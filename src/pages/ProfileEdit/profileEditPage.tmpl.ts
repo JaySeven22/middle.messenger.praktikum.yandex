@@ -1,35 +1,58 @@
 import Block from '../../framework/block';
-import type { BlockOwnProps } from '../../framework/block';
 import {
   validateForm,
   handleValidationFocus,
   handleValidationBlur,
 } from '../../utils/validation';
+import LoginPageAPI from '../Login/login.api';
+import ProfileEditPageAPI from './profileEdit.api';
+import connect from '../../utils/connectToStore';
+import store from '../../framework/store';
+import type { Indexed } from '../../utils/merge';
+import { mapUserToProps } from '../../composables/User';
+import type { UserData } from '../../entities/User';
+import type { ProfileEditPageProps } from '../../entities/Profile';
 
-interface ProfileEditPageProps extends BlockOwnProps {
-  email?: string;
-  login?: string;
-  firstName?: string;
-  secondName?: string;
-  displayName?: string;
-  phone?: string;
-  onNavigate?: (page: string) => void;
-}
-
-export default class ProfileEditPage extends Block<ProfileEditPageProps> {
+class ProfileEditPage extends Block<ProfileEditPageProps> {
   static componentName = 'ProfileEditPage';
+
+  private loginAPI = new LoginPageAPI();
+  private profileEditAPI = new ProfileEditPageAPI();
+
+  constructor(props = {} as ProfileEditPageProps) {
+    super(props);
+    this.props.onAvatarSubmit ??= this.handleAvatarSubmit;
+  }
+
+  private handleAvatarSubmit = (file: File): Promise<unknown> => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return this.profileEditAPI.changeUserAvatar(formData).then((data) => {
+      if (data && typeof data === 'object') {
+        store.setState('user', data as Indexed);
+      }
+      return data;
+    });
+  };
+
+  private openModal(refName: string): void {
+    const modalEl = this.refs[refName];
+    if (modalEl instanceof HTMLElement) {
+      modalEl.classList.add('modal--open');
+    }
+  }
 
   protected template = `
     <div class="profile-page profile-edit-page">
       <nav class="profile-page__sidebar" aria-label="Навигация">
         <button ref="backButton" class="profile-page__back-btn" type="button" aria-label="Назад">
-          <span class="profile-page__back-arrow">&lt;</span>
+          <img class="profile-page__back-arrow" src="/arrow-back.svg" alt="" aria-hidden="true" />
         </button>
       </nav>
 
       <main class="profile-page__content">
         <figure class="profile-page__avatar">
-          {{Avatar}}
+          {{Avatar src=avatar}}
         </figure>
 
         <form class="profile-page__form" action="#" method="post">
@@ -47,25 +70,70 @@ export default class ProfileEditPage extends Block<ProfileEditPageProps> {
           </div>
         </form>
       </main>
+
+      {{Modal
+        ref="uploadAvatarModal"
+        title="Загрузите файл"
+        isFileUpload=true
+        fileFieldName="avatar"
+        fileAccept="image/*"
+        filePickLabel="Выбрать файл на компьютере"
+        submitLabel="Поменять"
+        onFileSubmit=onAvatarSubmit
+      }}
     </div>
   `;
 
+  protected componentDidMount(): void {
+    if (store.getState().user) return;
+
+    this.loginAPI.authUser()
+      .then((data) => {
+        if (data && typeof data === 'object') {
+          store.setState('user', data as Indexed);
+        }
+      })
+      .catch((err) => {
+        window.alert('Произошла ошибка при получении данных пользователя');
+        console.log('err', err);
+      });
+  }
+
   protected events = {
     submit: (e: Event) => {
+      const form = e.target as HTMLFormElement;
+      if (!form.classList.contains('profile-page__form')) return;
       e.preventDefault();
-      const { isValid, data } = validateForm(e.target as HTMLFormElement);
-      if (isValid) {
-        console.log('Profile edit form:', data);
-        this.props.onNavigate?.('profile');
-      }
+      const { isValid, data } = validateForm(form);
+      if (!isValid) return;
+
+      this.profileEditAPI.changeUserProfile(data as unknown as UserData)
+        .then((response) => {
+          const updated = response && typeof response === 'object'
+            ? response
+            : { ...data };
+          store.setState('user', updated as Indexed);
+          this.props.onNavigate?.('profile');
+        })
+        .catch((err) => {
+          window.alert('Произошла ошибка при изменении данных пользователя');
+          console.log('err', err);
+        });
     },
     click: (e: Event) => {
       const target = e.target as HTMLElement;
       if (target.closest('.profile-page__back-btn')) {
         this.props.onNavigate?.('profile');
+        return;
+      }
+      if (target.closest('.avatar--interactive')) {
+        e.preventDefault();
+        this.openModal('uploadAvatarModal');
       }
     },
     focusin: handleValidationFocus,
     focusout: handleValidationBlur,
   };
 }
+
+export default connect(mapUserToProps)(ProfileEditPage as typeof Block);

@@ -5,6 +5,8 @@ import './components/Card/card.scss';
 import './components/Avatar/avatar.scss';
 import './components/UserCard/userCard.scss';
 import './components/SearchInput/searchInput.scss';
+import './components/DropdownMenu/dropdownMenu.scss';
+import './components/Modal/modal.scss';
 import './pages/Login/loginPage.scss';
 import './pages/Register/registerPage.scss';
 import './pages/Chat/chat.scss';
@@ -20,9 +22,14 @@ import './components/Input';
 import './components/Avatar';
 import './components/UserCard';
 import './components/SearchInput';
+import './components/DropdownMenu';
+import './components/Modal';
 
 import { initRouter } from './App';
+import { syncAuthFromApi } from './framework/authRouting';
 
 document.addEventListener('DOMContentLoaded', () => {
-  initRouter();
+  syncAuthFromApi().then(() => {
+    initRouter();
+  });
 });

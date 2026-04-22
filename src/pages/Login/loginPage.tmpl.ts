@@ -1,15 +1,13 @@
 import Block from '../../framework/block';
-import type { BlockOwnProps } from '../../framework/block';
 import {
   validateForm,
   handleValidationFocus,
   handleValidationBlur,
 } from '../../utils/validation';
-import LoginPageAPI, { type LoginFormData } from './login.api';
-
-interface LoginPageProps extends BlockOwnProps {
-  onNavigate?: (page: string) => void;
-}
+import LoginPageAPI from './login.api';
+import store from '../../framework/store';
+import type { Indexed } from '../../utils/merge';
+import type { LoginFormData, LoginPageProps } from '../../entities/Auth';
 
 export default class LoginPage extends Block<LoginPageProps> {
   static componentName = 'LoginPage';
@@ -44,7 +42,11 @@ export default class LoginPage extends Block<LoginPageProps> {
         };
         const loginAPI = new LoginPageAPI();
         loginAPI.signIn(loginFormData)
-        .then(() => {
+        .then(() => loginAPI.authUser())
+        .then((user) => {
+          if (user && typeof user === 'object') {
+            store.setState('user', user as Indexed);
+          }
           this.props.onNavigate?.('chat');
         }).catch(err => {
           window.alert('Произошла ошибка при авторизации');

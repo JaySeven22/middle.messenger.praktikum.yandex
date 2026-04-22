@@ -36,7 +36,7 @@ export function validateField(
 ): string | null {
   if (name === 'password_confirm') {
     const password =
-      form?.querySelector<HTMLInputElement>('input[name="password"]')?.value ?? '';
+      form?.querySelector<HTMLInputElement>('input[name="newPassword"]')?.value ?? '';
     if (value !== password) return 'Пароли не совпадают';
     const rule = RULES['password'];
     return rule && !rule.pattern.test(value) ? rule.message : null;

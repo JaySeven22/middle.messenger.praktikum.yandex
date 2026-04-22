@@ -1,4 +1,5 @@
 import Router from './framework/router';
+import { authRouteMiddleware } from './framework/authRouting';
 import { LoginPage } from './pages/Login';
 import { RegisterPage } from './pages/Register';
 import { ChatPage } from './pages/Chat';
@@ -7,8 +8,6 @@ import { ProfileEditPage } from './pages/ProfileEdit';
 import { ErrorPage } from './pages/ErrorPage';
 import { PasswordEditPage } from './pages/PasswordEdit';
 import type { RouteBlockConstructor } from './framework/route';
-import ChatAPI from './pages/Chat/chat.api';
-import store from './framework/store';
 
 let routerInstance: Router | null = null;
 
@@ -20,7 +19,9 @@ export function getRouter(): Router {
 }
 
 function pageNameToPath(name: string): string {
-  return name === '' ? '/' : `/${name}`;
+  if (name === '') return '/';
+  if (name === 'register') return '/sign-up';
+  return `/${name}`;
 }
 
 function navigate(page: string): void {
@@ -42,28 +43,9 @@ class RegisterRoute extends RegisterPage {
 class ChatRoute extends ChatPage {
   constructor() {
     super({
-      users: [
-        { name: 'Марина Кузнецова', lastMessage: 'lorem ipsum dolor sit amet lorem ipsum dolor sit amet', time: '09:23', unreadCount: 1 },
-        { name: 'Тимур Бобров', lastMessage: 'lorem ipsum dolor sit amet lorem ipsum dolor sit amet', time: '08:45', unreadCount: 3 },
-        { name: 'Олег Петров', lastMessage: 'lorem ipsum dolor sit amet lorem ipsum dolor sit amet', time: 'Вчера', isOwn: true, active: true },
-      ],
-      activeChat: {
-        name: 'Олег Петров',
-        messages: [
-          { dateSeparator: '5 марта' },
-          { text: 'lorem ipsum dolor sit amet lorem ipsum dolor sit amet', time: '14:20' },
-          { text: 'lorem ipsum dolor sit amet lorem ipsum dolor sit amet', time: '14:22' },
-        ],
-      },
+      users: [],
       onNavigate: navigate,
     });
-  }
-  componentDidMount(): void {
-    const chatAPI = new ChatAPI();
-    chatAPI.create().catch(() => store.setState('chat', { error: 'Ошибка при создании чата' }));
-    chatAPI.request().then(() => store.setState('chat', { response: 'Всн супер гуд' }));
-    console.log('componentDidMount', chatAPI);
-    console.log('componentDidMount', store);
   }
 }
 
@@ -98,9 +80,9 @@ class ProfileEditRoute extends ProfileEditPage {
 class PasswordEditRoute extends PasswordEditPage {
   constructor() {
     super({
-      passwordOld: '123456',
-      passwordNew: '123456',
-      passwordNewRepeat: '123456',
+      passwordOld: '',
+      passwordNew: '',
+      passwordNewRepeat: '',
       onNavigate: navigate,
     });
   }
@@ -121,12 +103,13 @@ export function initRouter(): void {
   routerInstance = new Router('#app');
 
   routerInstance
+    .useMiddleware(authRouteMiddleware)
     .use('/', LoginRoute)
-    .use('/register', RegisterRoute)
+    .use('/sign-up', RegisterRoute)
     .use('/chat', ChatRoute as unknown as RouteBlockConstructor)
-    .use('/profile', ProfileRoute)
-    .use('/profileEdit', ProfileEditRoute)
-    .use('/passwordEdit', PasswordEditRoute)
+    .use('/profile', ProfileRoute as unknown as RouteBlockConstructor)
+    .use('/profileEdit', ProfileEditRoute as unknown as RouteBlockConstructor)
+    .use('/passwordEdit', PasswordEditRoute as unknown as RouteBlockConstructor)
     .useFallback(NotFoundRoute);
     
 

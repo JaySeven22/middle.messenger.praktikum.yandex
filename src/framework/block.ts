@@ -17,7 +17,7 @@ export default abstract class Block<Props extends BlockOwnProps = BlockOwnProps>
   
   private domElement: Element | null = null;
 
-  /** true после первого componentDidMount; повторные render/setProps не должны вызывать его снова */
+  // true после первого componentDidMount; повторные render/setProps не должны вызывать его снова
   private didMount = false;
 
   protected children: Block<object>[] = [];
