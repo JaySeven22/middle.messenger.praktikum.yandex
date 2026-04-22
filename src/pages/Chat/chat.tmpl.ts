@@ -50,12 +50,14 @@ class ChatPage extends Block<ChatPageProps> {
       menuItems: DEFAULT_MENU_ITEMS,
       attachMenuItems: DEFAULT_ATTACH_MENU_ITEMS,
       addUserFields: ADD_USER_FIELDS,
+      removeUserFields: ADD_USER_FIELDS,
       createChatFields: CREATE_CHAT_FIELDS,
       ...props,
     });
     this.props.onMenuSelect ??= this.handleMenuSelect;
     this.props.onAttachMenuSelect ??= this.handleAttachMenuSelect;
     this.props.onAddUserSubmit ??= this.handleAddUserSubmit;
+    this.props.onRemoveUserSubmit ??= this.handleRemoveUserSubmit;
     this.props.onCreateChatSubmit ??= this.handleCreateChatSubmit;
   }
 
@@ -63,6 +65,11 @@ class ChatPage extends Block<ChatPageProps> {
     if (action === 'add-user') {
       this.openModal('addUserModal');
       this.clearAddUserLoginError();
+      return;
+    }
+    if (action === 'remove-user') {
+      this.openModal('removeUserModal');
+      this.clearRemoveUserLoginError();
       return;
     }
   };
@@ -114,6 +121,49 @@ class ChatPage extends Block<ChatPageProps> {
       });
   };
 
+  private handleRemoveUserSubmit = (values: Record<string, string>): Promise<void> => {
+    const login = (values.login ?? '').trim();
+    this.clearRemoveUserLoginError();
+
+    if (!login) {
+      this.showRemoveUserLoginError('Укажите логин пользователя');
+      return Promise.reject(new Error('empty login'));
+    }
+
+    return this.chatAPI.searchUsers(login)
+      .then((raw) => {
+        const found = parseUserSearchResponse(raw).filter((u) => u.login === login);
+
+        if (found.length === 0) {
+          this.showRemoveUserLoginError('Пользователь не найден');
+          return Promise.reject(new Error('user not found'));
+        }
+
+        if (found.length > 1) {
+          this.showRemoveUserLoginError('Укажите полный логин пользователя');
+          return Promise.reject(new Error('ambiguous login'));
+        }
+
+        const chatId = this.props.activeChat?.id ?? 0;
+        const data: AddUserToChatData = {
+          users: [found[0].id],
+          chatId,
+        };
+
+        return this.chatAPI.delteUserFromChat(data).then(() => {
+          if (chatId) {
+            this.lastFetchedChatId = null;
+            this.fetchChatUsers(chatId);
+          }
+        });
+      })
+      .catch((err) => {
+        window.alert('Произошла ошибка при удалении пользователя');
+        console.log('err', err);
+        throw err;
+      });
+  };
+
   private getAddUserLoginField(): HTMLElement | null {
     const modalEl = this.refs.addUserModal;
     if (!(modalEl instanceof HTMLElement)) return null;
@@ -136,6 +186,33 @@ class ChatPage extends Block<ChatPageProps> {
 
   private clearAddUserLoginError(): void {
     const field = this.getAddUserLoginField();
+    if (!field) return;
+    field.classList.remove('input-field--error');
+    field.querySelector('.input-field__error')?.remove();
+  }
+
+  private getRemoveUserLoginField(): HTMLElement | null {
+    const modalEl = this.refs.removeUserModal;
+    if (!(modalEl instanceof HTMLElement)) return null;
+    const input = modalEl.querySelector<HTMLInputElement>('input[name="login"]');
+    return input?.closest<HTMLElement>('.input-field') ?? null;
+  }
+
+  private showRemoveUserLoginError(message: string): void {
+    const field = this.getRemoveUserLoginField();
+    if (!field) return;
+    field.classList.add('input-field--error');
+    let errorEl = field.querySelector<HTMLElement>('.input-field__error');
+    if (!errorEl) {
+      errorEl = document.createElement('span');
+      errorEl.className = 'input-field__error';
+      field.appendChild(errorEl);
+    }
+    errorEl.textContent = message;
+  }
+
+  private clearRemoveUserLoginError(): void {
+    const field = this.getRemoveUserLoginField();
     if (!field) return;
     field.classList.remove('input-field--error');
     field.querySelector('.input-field__error')?.remove();
@@ -457,6 +534,14 @@ class ChatPage extends Block<ChatPageProps> {
         fields=addUserFields
         submitLabel="Добавить"
         onSubmit=onAddUserSubmit
+      }}
+
+      {{Modal
+        ref="removeUserModal"
+        title="Удалить пользователя"
+        fields=removeUserFields
+        submitLabel="Удалить"
+        onSubmit=onRemoveUserSubmit
       }}
 
       {{Modal

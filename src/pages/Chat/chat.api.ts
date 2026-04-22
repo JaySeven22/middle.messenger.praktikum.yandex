@@ -10,13 +10,16 @@ class ChatAPI extends BaseAPI {
         return chatAPIInstance.get(`${offset ? `?offset=${offset}` : ''}${limit ? `&limit=${limit}` : ''}${title ? `&title=${title}` : ''}`);
     }
     createChat(title: string) {
-        return chatAPIInstance.post('', { login: { title } });
+        return chatAPIInstance.post('', { data: { title } });
     }
     searchUsers(login: string) {
         return userAPIInstance.post('/search', { data: { login } });
     }
     addUserToChat(data: AddUserToChatData) {
         return chatAPIInstance.put('/users', { data });
+    }
+    delteUserFromChat(data: AddUserToChatData) {
+        return chatAPIInstance.delete(`/users`, { data });
     }
     getUsersInChat(chatId: number) {
         return chatAPIInstance.get(`/${chatId}/users`);

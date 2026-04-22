@@ -33,6 +33,8 @@ export type ChatPageProps = BlockOwnProps & {
   onAttachMenuSelect?: (action: string) => void;
   addUserFields?: ModalField[];
   onAddUserSubmit?: (values: Record<string, string>) => void;
+  removeUserFields?: ModalField[];
+  onRemoveUserSubmit?: (values: Record<string, string>) => void;
   createChatFields?: ModalField[];
   onCreateChatSubmit?: (values: Record<string, string>) => void;
   onNavigate?: (page: string) => void;
