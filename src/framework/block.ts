@@ -17,6 +17,9 @@ export default abstract class Block<Props extends BlockOwnProps = BlockOwnProps>
   
   private domElement: Element | null = null;
 
+  // true после первого componentDidMount; повторные render/setProps не должны вызывать его снова
+  private didMount = false;
+
   protected children: Block<object>[] = [];
 
   protected refs: Record<string, Element> = {};
@@ -34,7 +37,27 @@ export default abstract class Block<Props extends BlockOwnProps = BlockOwnProps>
     return this.domElement;
   }
 
+  public hide() {
+    const el = this.element();
+    if (el instanceof HTMLElement) {
+      el.style.display = 'none';
+    }
+  }
+
+  public show() {
+    const el = this.element();
+    if (el instanceof HTMLElement) {
+      el.style.display = '';
+    }
+  }
+
   private compile() {
+    // Хелперы Handlebars делают push в data.root.__children / __refs. Без сброса при новом
+    // compile в массиве остаются старые embed() с устаревшими data-component-hbs-id — в новом
+    // HTML таких плейсхолдеров уже нет → "Can't find data-id for component …".
+    this.props.__children = [];
+    this.props.__refs = {};
+
     const html = Handlebars.compile(this.template)(this.props);
     const templateElement = document.createElement("template");
 
@@ -78,7 +101,10 @@ export default abstract class Block<Props extends BlockOwnProps = BlockOwnProps>
 
   private mountComponent() {
     this.attachListeners();
-    this.componentDidMount();
+    if (!this.didMount) {
+      this.componentDidMount();
+      this.didMount = true;
+    }
   }
 
   protected componentWillUnmount() {}

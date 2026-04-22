@@ -1,13 +1,5 @@
 import Block from '../../framework/block';
-import type { BlockOwnProps } from '../../framework/block';
-
-interface ErrorPageProps extends BlockOwnProps {
-  code?: number;
-  message?: string;
-  linkText?: string;
-  linkHref?: string;
-  onNavigate?: (page: string) => void;
-}
+import type { ErrorPageProps } from '../../entities/Error';
 
 export default class ErrorPage extends Block<ErrorPageProps> {
   static componentName = 'ErrorPage';

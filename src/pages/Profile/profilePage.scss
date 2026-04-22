@@ -36,16 +36,9 @@ $danger: #E53935;
   }
 
   &__back-arrow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     width: 28px;
     height: 28px;
-    border-radius: 50%;
-    background: $primary;
-    color: #fff;
-    font-size: 1.5rem;
-    line-height: 1;
   }
 
   &__content {

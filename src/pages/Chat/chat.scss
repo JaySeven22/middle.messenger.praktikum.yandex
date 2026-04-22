@@ -23,10 +23,18 @@ $primary: #3369F3;
   &__sidebar-header {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
+    align-items: stretch;
     gap: 12px;
     padding: 16px;
     border-bottom: 1px solid $border-color;
+  }
+
+  &__sidebar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
   }
 
   &__profile-link {
@@ -35,10 +43,40 @@ $primary: #3369F3;
     color: $text-secondary;
     text-decoration: none;
     transition: color 0.15s;
+    flex-shrink: 0;
 
     &:hover {
       color: $primary;
     }
+  }
+
+  &__create-chat-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: $text-secondary;
+    cursor: pointer;
+    transition: color 0.15s;
+    flex-shrink: 0;
+
+    &:hover {
+      color: $primary;
+    }
+  }
+
+  &__create-chat-icon {
+    display: block;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    opacity: 0.85;
   }
 
   &__contacts {
@@ -47,10 +85,15 @@ $primary: #3369F3;
     list-style: none;
     margin: 0;
     padding: 0;
+    overflow-x: hidden;
 
     li {
       list-style: none;
     }
+  }
+
+  &__contact-item {
+    cursor: pointer;
   }
 
   // Dialog area
@@ -63,6 +106,7 @@ $primary: #3369F3;
   }
 
   &__dialog-header {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -71,6 +115,18 @@ $primary: #3369F3;
     border-bottom: 1px solid $border-color;
     min-height: 56px;
     box-sizing: border-box;
+  }
+
+  &__dialog-participants {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    font-size: 0.8125rem;
+    color: $text-secondary;
+    white-space: nowrap;
+    pointer-events: none;
   }
 
   &__dialog-user {
@@ -99,19 +155,6 @@ $primary: #3369F3;
     font-size: 0.9375rem;
     color: #1a1a1a;
     margin: 0;
-  }
-
-  &__menu-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    transition: background 0.15s;
-
-    &:hover {
-      background: #f0f0f0;
-    }
   }
 
   // Messages
@@ -218,19 +261,29 @@ $primary: #3369F3;
     }
   }
 
+  &__compose-form .dropdown-menu {
+    flex-shrink: 0;
+    align-self: center;
+  }
+
   &__compose-send {
     flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: $primary;
-    color: #fff;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: none;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: opacity 0.15s;
+
+    img {
+      width: 28px;
+      height: 28px;
+      transform: scaleX(-1);
+    }
 
     &:hover {
       opacity: 0.85;
