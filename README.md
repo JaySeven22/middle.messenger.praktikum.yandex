@@ -77,5 +77,5 @@ src/
 
 ## Netlify
 
-Развёрнутое приложение: *(https://69b1d9c9426f7f0ddea7eb8d--stirring-smakager-3c2331.netlify.app/)*
+Развёрнутое приложение: *(https://stirring-smakager-3c2331.netlify.app/)*
 
