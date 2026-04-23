@@ -106,9 +106,9 @@ export function initRouter(): void {
     .useMiddleware(authRouteMiddleware)
     .use('/', LoginRoute)
     .use('/sign-up', RegisterRoute)
-    .use('/chat', ChatRoute as unknown as RouteBlockConstructor)
-    .use('/profile', ProfileRoute as unknown as RouteBlockConstructor)
-    .use('/profileEdit', ProfileEditRoute as unknown as RouteBlockConstructor)
+    .use('/messenger', ChatRoute as unknown as RouteBlockConstructor)
+    .use('/settings', ProfileRoute as unknown as RouteBlockConstructor)
+    .use('/settingsEdit', ProfileEditRoute as unknown as RouteBlockConstructor)
     .use('/passwordEdit', PasswordEditRoute as unknown as RouteBlockConstructor)
     .useFallback(NotFoundRoute);
     

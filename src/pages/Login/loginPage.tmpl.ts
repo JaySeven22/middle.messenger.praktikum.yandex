@@ -47,7 +47,7 @@ export default class LoginPage extends Block<LoginPageProps> {
           if (user && typeof user === 'object') {
             store.setState('user', user as Indexed);
           }
-          this.props.onNavigate?.('chat');
+          this.props.onNavigate?.('messenger');
         }).catch(err => {
           window.alert('Произошла ошибка при авторизации');
           console.log(err)
