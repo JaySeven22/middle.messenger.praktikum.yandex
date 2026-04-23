@@ -68,7 +68,7 @@ class PasswordEditPage extends Block<PasswordEditPageProps> {
         };
         this.passwordEditApi.chamgePassword(passwordEditFormData)
         .then(() => {
-          this.props.onNavigate?.('profile');
+          this.props.onNavigate?.('settings');
         })
         .catch((err) => {
           window.alert('Произошла ошибка при изменении пароля');
@@ -79,7 +79,7 @@ class PasswordEditPage extends Block<PasswordEditPageProps> {
     click: (e: Event) => {
       const target = e.target as HTMLElement;
       if (target.closest('.password-edit-page__back-btn')) {
-        this.props.onNavigate?.('profile');
+        this.props.onNavigate?.('settings');
       }
     },
     focusin: handleValidationFocus,

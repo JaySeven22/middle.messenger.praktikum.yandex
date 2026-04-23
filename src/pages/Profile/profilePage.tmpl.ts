@@ -93,7 +93,7 @@ class ProfilePage extends Block<ProfilePageProps> {
       const target = e.target as HTMLElement;
 
       if (target.closest('.profile-page__back-btn')) {
-        this.props.onNavigate?.('chat');
+        this.props.onNavigate?.('messenger');
         return;
       }
 
@@ -101,7 +101,7 @@ class ProfilePage extends Block<ProfilePageProps> {
       const action = actionButton?.dataset.action;
 
       if (action === 'edit-profile') {
-        this.props.onNavigate?.('profileEdit');
+        this.props.onNavigate?.('settingsEdit');
       }
 
       if (action === 'edit-password') {

@@ -113,7 +113,7 @@ class ProfileEditPage extends Block<ProfileEditPageProps> {
             ? response
             : { ...data };
           store.setState('user', updated as Indexed);
-          this.props.onNavigate?.('profile');
+          this.props.onNavigate?.('settings');
         })
         .catch((err) => {
           window.alert('Произошла ошибка при изменении данных пользователя');
@@ -123,7 +123,7 @@ class ProfileEditPage extends Block<ProfileEditPageProps> {
     click: (e: Event) => {
       const target = e.target as HTMLElement;
       if (target.closest('.profile-page__back-btn')) {
-        this.props.onNavigate?.('profile');
+        this.props.onNavigate?.('settings');
         return;
       }
       if (target.closest('.avatar--interactive')) {

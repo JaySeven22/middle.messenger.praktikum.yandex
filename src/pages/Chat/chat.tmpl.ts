@@ -379,7 +379,7 @@ class ChatPage extends Block<ChatPageProps> {
       }
       if (target.closest('.chat-page__profile-link')) {
         e.preventDefault();
-        this.props.onNavigate?.('profile');
+        this.props.onNavigate?.('settings');
       }
     },
     focusin: (e: Event) => {
