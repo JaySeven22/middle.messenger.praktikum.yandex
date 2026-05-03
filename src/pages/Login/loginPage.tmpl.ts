@@ -1,14 +1,13 @@
 import Block from '../../framework/block';
-import type { BlockOwnProps } from '../../framework/block';
 import {
   validateForm,
   handleValidationFocus,
   handleValidationBlur,
 } from '../../utils/validation';
-
-interface LoginPageProps extends BlockOwnProps {
-  onNavigate?: (page: string) => void;
-}
+import LoginPageAPI from './login.api';
+import store from '../../framework/store';
+import type { Indexed } from '../../utils/merge';
+import type { LoginFormData, LoginPageProps } from '../../entities/Auth';
 
 export default class LoginPage extends Block<LoginPageProps> {
   static componentName = 'LoginPage';
@@ -37,7 +36,22 @@ export default class LoginPage extends Block<LoginPageProps> {
       const { isValid, data } = validateForm(e.target as HTMLFormElement);
       if (isValid) {
         console.log('Login form:', data);
-        this.props.onNavigate?.('chat');
+        const loginFormData: LoginFormData = {
+          login: data.login,
+          password: data.password,
+        };
+        const loginAPI = new LoginPageAPI();
+        loginAPI.signIn(loginFormData)
+        .then(() => loginAPI.authUser())
+        .then((user) => {
+          if (user && typeof user === 'object') {
+            store.setState('user', user as Indexed);
+          }
+          this.props.onNavigate?.('messenger');
+        }).catch(err => {
+          window.alert('Произошла ошибка при авторизации');
+          console.log(err)
+        })
       }
     },
     click: (e: Event) => {

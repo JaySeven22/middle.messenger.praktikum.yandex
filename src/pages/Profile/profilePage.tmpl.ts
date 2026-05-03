@@ -1,30 +1,30 @@
 import Block from '../../framework/block';
-import type { BlockOwnProps } from '../../framework/block';
+import ProfilePageAPI from './profile.api';
+import LoginPageAPI from '../Login/login.api';
+import connect from '../../utils/connectToStore';
+import store from '../../framework/store';
+import type { Indexed } from '../../utils/merge';
+import { mapUserToProps } from '../../composables/User';
+import { clearAuthUser } from '../../framework/authRouting';
+import type { ProfilePageProps } from '../../entities/Profile';
 
-interface ProfilePageProps extends BlockOwnProps {
-  email?: string;
-  login?: string;
-  firstName?: string;
-  secondName?: string;
-  displayName?: string;
-  phone?: string;
-  onNavigate?: (page: string) => void;
-}
-
-export default class ProfilePage extends Block<ProfilePageProps> {
+class ProfilePage extends Block<ProfilePageProps> {
   static componentName = 'ProfilePage';
+
+  private loginAPI = new LoginPageAPI();
+  private profileAPI = new ProfilePageAPI();
 
   protected template = `
     <div class="profile-page">
       <nav class="profile-page__sidebar" aria-label="Навигация">
         <button class="profile-page__back-btn" type="button" aria-label="Назад">
-          <span class="profile-page__back-arrow">&lt;</span>
+          <img class="profile-page__back-arrow" src="/arrow-back.svg" alt="" aria-hidden="true" />
         </button>
       </nav>
 
       <main class="profile-page__content">
         <figure class="profile-page__avatar">
-          {{Avatar}}
+          {{Avatar src=avatar}}
         </figure>
 
         <h2 class="profile-page__username">{{displayName}}</h2>
@@ -75,12 +75,25 @@ export default class ProfilePage extends Block<ProfilePageProps> {
     </div>
   `;
 
+  protected componentDidMount(): void {
+    this.loginAPI.authUser()
+      .then((data) => {
+        if (data && typeof data === 'object') {
+          store.setState('user', data as Indexed);
+        }
+      })
+      .catch((err) => {
+        window.alert('Произошла ошибка при получении данных пользователя');
+        console.log('err', err);
+      });
+  }
+
   protected events = {
     click: (e: Event) => {
       const target = e.target as HTMLElement;
 
       if (target.closest('.profile-page__back-btn')) {
-        this.props.onNavigate?.('chat');
+        this.props.onNavigate?.('messenger');
         return;
       }
 
@@ -88,7 +101,7 @@ export default class ProfilePage extends Block<ProfilePageProps> {
       const action = actionButton?.dataset.action;
 
       if (action === 'edit-profile') {
-        this.props.onNavigate?.('profileEdit');
+        this.props.onNavigate?.('settingsEdit');
       }
 
       if (action === 'edit-password') {
@@ -96,8 +109,18 @@ export default class ProfilePage extends Block<ProfilePageProps> {
       }
 
       if (action === 'logout') {
-        this.props.onNavigate?.('');
+        this.profileAPI.logout()
+          .then(() => {
+            clearAuthUser();
+            this.props.onNavigate?.('');
+          })
+          .catch((err) => {
+            window.alert('Произошла ошибка при выходе из аккаунта');
+            console.log(err);
+          });
       }
     },
   };
 }
+
+export default connect(mapUserToProps)(ProfilePage as typeof Block);

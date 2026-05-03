@@ -1,4 +1,5 @@
-import type Block from './framework/block';
+import Router from './framework/router';
+import { authRouteMiddleware } from './framework/authRouting';
 import { LoginPage } from './pages/Login';
 import { RegisterPage } from './pages/Register';
 import { ChatPage } from './pages/Chat';
@@ -6,96 +7,111 @@ import { ProfilePage } from './pages/Profile';
 import { ProfileEditPage } from './pages/ProfileEdit';
 import { ErrorPage } from './pages/ErrorPage';
 import { PasswordEditPage } from './pages/PasswordEdit';
+import type { RouteBlockConstructor } from './framework/route';
 
-export default class App {
-  private appElement: HTMLElement;
-  private currentPage: string;
+let routerInstance: Router | null = null;
 
+export function getRouter(): Router {
+  if (!routerInstance) {
+    throw new Error('Router is not initialized');
+  }
+  return routerInstance;
+}
+
+function pageNameToPath(name: string): string {
+  if (name === '') return '/';
+  if (name === 'register') return '/sign-up';
+  return `/${name}`;
+}
+
+function navigate(page: string): void {
+  getRouter().go(pageNameToPath(page));
+}
+
+class LoginRoute extends LoginPage {
   constructor() {
-    this.currentPage = '';
-    this.appElement = document.getElementById('app')!;
+    super({ onNavigate: navigate });
   }
+}
 
-  render() {
-    const navigate = (page: string) => this.changePage(page);
-    let page: Block;
-
-    switch (this.currentPage) {
-      case '':
-        page = new LoginPage({ onNavigate: navigate });
-        break;
-      case 'register':
-        page = new RegisterPage({ onNavigate: navigate });
-        break;
-      case 'chat':
-        page = new ChatPage({
-          users: [
-            { name: 'Марина Кузнецова', lastMessage: 'lorem ipsum dolor sit amet lorem ipsum dolor sit amet', time: '09:23', unreadCount: 1 },
-            { name: 'Тимур Бобров', lastMessage: 'lorem ipsum dolor sit amet lorem ipsum dolor sit amet', time: '08:45', unreadCount: 3 },
-            { name: 'Олег Петров', lastMessage: 'lorem ipsum dolor sit amet lorem ipsum dolor sit amet', time: 'Вчера', isOwn: true, active: true },
-          ],
-          activeChat: {
-            name: 'Олег Петров',
-            messages: [
-              { dateSeparator: '5 марта' },
-              { text: 'lorem ipsum dolor sit amet lorem ipsum dolor sit amet', time: '14:20' },
-              { text: 'lorem ipsum dolor sit amet lorem ipsum dolor sit amet', time: '14:22' },
-            ],
-          },
-          onNavigate: navigate,
-        });
-        break;
-      case 'profile':
-        page = new ProfilePage({
-          email: 'pochta@yandex.ru',
-          login: 'ivanivanov',
-          firstName: 'Иван',
-          secondName: 'Иванов',
-          displayName: 'Иван',
-          phone: '+79099673030',
-          onNavigate: navigate,
-        });
-        break;
-      case 'profileEdit':
-        page = new ProfileEditPage({
-          email: 'pochta@yandex.ru',
-          login: 'ivanivanov',
-          firstName: 'Иван',
-          secondName: 'Иванов',
-          displayName: 'Иван',
-          phone: '+79099673030',
-          onNavigate: navigate,
-        });
-        break;
-      case 'passwordEdit':
-        page = new PasswordEditPage({
-          passwordOld: '123456',
-          passwordNew: '123456',
-          passwordNewRepeat: '123456',
-          onNavigate: navigate,
-        });
-        break;
-      default:
-        page = new ErrorPage({
-          code: 404,
-          message: 'Не туда попали',
-          linkText: 'Назад к чатам',
-          onNavigate: navigate,
-        });
-        break;
-    }
-
-    this.appElement.innerHTML = '';
-    const element = page.element();
-    if (element) {
-      this.appElement.appendChild(element);
-    }
+class RegisterRoute extends RegisterPage {
+  constructor() {
+    super({ onNavigate: navigate });
   }
+}
 
-  changePage(page: string) {
-    this.currentPage = page;
-    const path = page ? `/${page}` : '/';
-    window.history.pushState({ page }, '', path);
-    this.render();
+class ChatRoute extends ChatPage {
+  constructor() {
+    super({
+      users: [],
+      onNavigate: navigate,
+    });
   }
+}
+
+class ProfileRoute extends ProfilePage {
+  constructor() {
+    super({
+      email: 'pochta@yandex.ru',
+      login: 'ivanivanov',
+      firstName: 'Иван',
+      secondName: 'Иванов',
+      displayName: 'Иван',
+      phone: '+79099673030',
+      onNavigate: navigate,
+    });
+  }
+}
+
+class ProfileEditRoute extends ProfileEditPage {
+  constructor() {
+    super({
+      email: 'pochta@yandex.ru',
+      login: 'ivanivanov',
+      firstName: 'Иван',
+      secondName: 'Иванов',
+      displayName: 'Иван',
+      phone: '+79099673030',
+      onNavigate: navigate,
+    });
+  }
+}
+
+class PasswordEditRoute extends PasswordEditPage {
+  constructor() {
+    super({
+      passwordOld: '',
+      passwordNew: '',
+      passwordNewRepeat: '',
+      onNavigate: navigate,
+    });
+  }
+}
+
+class NotFoundRoute extends ErrorPage {
+  constructor() {
+    super({
+      code: 404,
+      message: 'Не туда попали',
+      linkText: 'Назад к чатам',
+      onNavigate: navigate,
+    });
+  }
+}
+
+export function initRouter(): void {
+  routerInstance = new Router('#app');
+
+  routerInstance
+    .useMiddleware(authRouteMiddleware)
+    .use('/', LoginRoute)
+    .use('/sign-up', RegisterRoute)
+    .use('/messenger', ChatRoute as unknown as RouteBlockConstructor)
+    .use('/settings', ProfileRoute as unknown as RouteBlockConstructor)
+    .use('/settingsEdit', ProfileEditRoute as unknown as RouteBlockConstructor)
+    .use('/passwordEdit', PasswordEditRoute as unknown as RouteBlockConstructor)
+    .useFallback(NotFoundRoute);
+    
+
+  routerInstance.start();
 }

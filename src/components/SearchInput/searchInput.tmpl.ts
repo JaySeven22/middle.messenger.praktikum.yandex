@@ -3,6 +3,7 @@ import type { BlockOwnProps } from '../../framework/block';
 
 interface SearchInputProps extends BlockOwnProps {
   placeholder?: string;
+  value?: string;
   name?: string;
   id?: string;
 }
@@ -12,10 +13,12 @@ export default class SearchInput extends Block<SearchInputProps> {
 
   protected template = `
     <div class="search-input">
+      <img class="search-input__icon" src="/search.svg" alt="" aria-hidden="true" />
       <input
         class="search-input__input"
         type="text"
         placeholder=" "
+        value="{{or value ""}}"
         {{#if name}}name="{{name}}"{{/if}}
         {{#if id}}id="{{id}}"{{/if}}
       />

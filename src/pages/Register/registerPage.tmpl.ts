@@ -1,14 +1,11 @@
 import Block from '../../framework/block';
-import type { BlockOwnProps } from '../../framework/block';
 import {
   validateForm,
   handleValidationFocus,
   handleValidationBlur,
 } from '../../utils/validation';
-
-interface RegisterPageProps extends BlockOwnProps {
-  onNavigate?: (page: string) => void;
-}
+import RegisterPageAPI from './register.api';
+import type { RegisterFormData, RegisterPageProps } from '../../entities/Auth';
 
 export default class RegisterPage extends Block<RegisterPageProps> {
   static componentName = 'RegisterPage';
@@ -40,9 +37,23 @@ export default class RegisterPage extends Block<RegisterPageProps> {
     submit: (e: Event) => {
       e.preventDefault();
       const { isValid, data } = validateForm(e.target as HTMLFormElement);
+      const registerFormData: RegisterFormData = {
+        first_name: data.first_name,
+        second_name: data.second_name,
+        login: data.login,
+        email: data.email,
+        password: data.password,
+        phone: data.phone,
+      };
       if (isValid) {
-        console.log('Register form:', data);
-        this.props.onNavigate?.('');
+        const registerAPI = new RegisterPageAPI();
+        registerAPI.createUser(registerFormData)
+        .then(() => {
+          this.props.onNavigate?.('');
+        }).catch(err => {
+          window.alert('Произошла ошибка при регистрации');
+          console.log(err)
+        })
       }
     },
     click: (e: Event) => {
