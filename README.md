@@ -130,6 +130,10 @@ src/
   (whitelist собственного origin + `https://ya-praktikum.tech` и
   `wss://ya-praktikum.tech`), `X-Content-Type-Options`, `X-Frame-Options`,
   `Referrer-Policy`, `Permissions-Policy`.
+- В `script-src` намеренно разрешён `'unsafe-eval'`: Handlebars в runtime
+  компилирует шаблоны через `new Function(...)`. Чтобы избавиться от
+  `'unsafe-eval'`, нужна прекомпиляция шаблонов на этапе сборки — это
+  возможная будущая доработка.
 
 ## Netlify
 
