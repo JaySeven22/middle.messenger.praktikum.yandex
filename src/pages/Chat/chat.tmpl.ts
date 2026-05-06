@@ -1,4 +1,5 @@
 import Block from '../../framework/block';
+import ChatWebSocket from '../../framework/chatSocket';
 import { validateField } from '../../utils/validation';
 import connect from '../../utils/connectToStore';
 import store from '../../framework/store';
@@ -7,15 +8,23 @@ import {
   parseChatsResponse,
   parseUserSearchResponse,
   parseChatUsersResponse,
+  parseChatMessagesResponse,
   mapChatPageToProps,
 } from '../../composables/Chat';
 import type { DropdownMenuItem } from '../../entities/DropdownMenu';
 import type { ModalField } from '../../entities/Modal';
-import type { AddUserToChatData, ChatPageProps } from '../../entities/Chat';
+import type {
+  AddUserToChatData,
+  ChatPageProps,
+  ChatMessageRaw,
+} from '../../entities/Chat';
+import type { Indexed } from '../../utils/merge';
 
 const DEFAULT_MENU_ITEMS: DropdownMenuItem[] = [
   { label: 'Добавить пользователя', action: 'add-user', icon: 'add' },
   { label: 'Удалить пользователя', action: 'remove-user', icon: 'remove' },
+  { label: 'Сменить аватар чата', action: 'change-avatar', iconSrc: '/media.svg' },
+  { label: 'Удалить чат', action: 'delete-chat', icon: 'remove', danger: true },
 ];
 
 const DEFAULT_ATTACH_MENU_ITEMS: DropdownMenuItem[] = [
@@ -37,6 +46,8 @@ class ChatPage extends Block<ChatPageProps> {
 
   private chatAPI = new ChatAPI();
 
+  private chatSocket = new ChatWebSocket();
+
   private searchDebounceTimer: number | null = null;
 
   private searchRequestSeq = 0;
@@ -44,6 +55,12 @@ class ChatPage extends Block<ChatPageProps> {
   private lastFetchedChatId: number | null = null;
 
   private chatUsersRequestSeq = 0;
+
+  private socketChatId: number | null = null;
+
+  private shouldScrollMessages = false;
+
+  private isParticipantsOpen = false;
 
   constructor(props = {} as ChatPageProps) {
     super({
@@ -59,7 +76,180 @@ class ChatPage extends Block<ChatPageProps> {
     this.props.onAddUserSubmit ??= this.handleAddUserSubmit;
     this.props.onRemoveUserSubmit ??= this.handleRemoveUserSubmit;
     this.props.onCreateChatSubmit ??= this.handleCreateChatSubmit;
+    this.props.onChangeAvatarSubmit ??= this.handleChangeAvatarSubmit;
   }
+
+  public setProps(next: Partial<ChatPageProps>): void {
+    const prevChatId = this.props.activeChat?.id;
+    const prevMessagesLen = this.props.activeChat?.messages?.length ?? 0;
+    super.setProps(next);
+    const nextChatId = this.props.activeChat?.id;
+    const nextMessagesLen = this.props.activeChat?.messages?.length ?? 0;
+
+    if (prevChatId !== nextChatId) {
+      void this.syncChatSocket(nextChatId);
+      this.shouldScrollMessages = true;
+    } else if (nextMessagesLen !== prevMessagesLen) {
+      this.shouldScrollMessages = true;
+    }
+
+    if (this.shouldScrollMessages) {
+      this.shouldScrollMessages = false;
+      this.scrollMessagesToBottom();
+    }
+
+    if (prevChatId !== nextChatId) {
+      this.isParticipantsOpen = false;
+    } else if (this.isParticipantsOpen) {
+      this.applyParticipantsOpenState();
+    }
+  }
+
+  private async syncChatSocket(chatId: number | undefined): Promise<void> {
+    this.chatSocket.close();
+    this.socketChatId = null;
+    if (typeof chatId !== 'number' || !Number.isFinite(chatId)) {
+      return;
+    }
+    const user = store.getState().user as Indexed | null | undefined;
+    const userId = typeof user?.id === 'number' ? user.id : null;
+    if (userId === null) {
+      return;
+    }
+
+    try {
+      const raw = await this.chatAPI.getChatToken(chatId);
+      const token =
+        typeof raw === 'object' &&
+        raw !== null &&
+        'token' in raw &&
+        typeof (raw as { token: unknown }).token === 'string'
+          ? (raw as { token: string }).token
+          : null;
+      if (!token) {
+        return;
+      }
+
+      this.socketChatId = chatId;
+      store.setState(`messages.${chatId}`, []);
+
+      this.chatSocket.open(userId, chatId, token, {
+        onOpen: () => {
+          this.chatSocket.sendJson({
+            type: 'get old',
+            content: '0',
+          });
+        },
+        onMessage: (message) => {
+          if (
+            message &&
+            typeof message === 'object' &&
+            !Array.isArray(message) &&
+            (message as { type?: unknown }).type === 'user connected'
+          ) {
+            return;
+          }
+          this.handleIncomingChatMessage(chatId, message);
+        },
+        onError: (e) => {
+          console.log('[chat ws] error', e);
+        },
+        onClose: (e) => {
+          console.log('[chat ws] close', e.code, e.reason);
+        },
+      });
+    } catch (err) {
+      console.log('[chat ws] token', err);
+    }
+  }
+
+  private handleIncomingChatMessage(chatId: number, payload: unknown): void {
+    if (this.socketChatId !== chatId) {
+      return;
+    }
+    const incoming = parseChatMessagesResponse(payload);
+    if (incoming.length === 0) {
+      return;
+    }
+    const state = store.getState();
+    const messagesMap =
+      state.messages && typeof state.messages === 'object'
+        ? (state.messages as Record<string, unknown>)
+        : {};
+    const existing = Array.isArray(messagesMap[String(chatId)])
+      ? (messagesMap[String(chatId)] as ChatMessageRaw[])
+      : [];
+
+    const seen = new Set(existing.map((m) => m.id));
+    const merged = [...existing];
+    for (const m of incoming) {
+      if (seen.has(m.id)) continue;
+      seen.add(m.id);
+      merged.push(m);
+    }
+    store.setState(`messages.${chatId}`, merged);
+  }
+
+  private scrollMessagesToBottom(): void {
+    requestAnimationFrame(() => {
+      const list = this.element()?.querySelector<HTMLElement>('.chat-page__messages');
+      if (list) {
+        list.scrollTop = list.scrollHeight;
+      }
+    });
+  }
+
+  private getParticipantsNodes(): {
+    trigger: HTMLButtonElement | null;
+    popover: HTMLElement | null;
+  } {
+    const root = this.element();
+    if (!(root instanceof HTMLElement)) return { trigger: null, popover: null };
+    return {
+      trigger: root.querySelector<HTMLButtonElement>('.chat-page__dialog-participants'),
+      popover: root.querySelector<HTMLElement>('.chat-page__participants-popover'),
+    };
+  }
+
+  private applyParticipantsOpenState(): void {
+    const { trigger, popover } = this.getParticipantsNodes();
+    if (!trigger || !popover) return;
+    if (this.isParticipantsOpen) {
+      popover.hidden = false;
+      trigger.setAttribute('aria-expanded', 'true');
+    } else {
+      popover.hidden = true;
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  private openParticipants(): void {
+    if (this.isParticipantsOpen) return;
+    this.isParticipantsOpen = true;
+    this.applyParticipantsOpenState();
+    document.addEventListener('click', this.handleParticipantsOutsideClick, true);
+    document.addEventListener('keydown', this.handleParticipantsEscape);
+  }
+
+  private closeParticipants(): void {
+    if (!this.isParticipantsOpen) return;
+    this.isParticipantsOpen = false;
+    this.applyParticipantsOpenState();
+    document.removeEventListener('click', this.handleParticipantsOutsideClick, true);
+    document.removeEventListener('keydown', this.handleParticipantsEscape);
+  }
+
+  private handleParticipantsOutsideClick = (e: Event): void => {
+    const root = this.element();
+    const wrapper = root?.querySelector('.chat-page__participants');
+    const target = e.target as Node | null;
+    if (!wrapper || !target) return;
+    if (!wrapper.contains(target)) this.closeParticipants();
+  };
+
+  private handleParticipantsEscape = (e: KeyboardEvent): void => {
+    if (e.key === 'Escape') this.closeParticipants();
+  };
 
   private handleMenuSelect = (action: string): void => {
     if (action === 'add-user') {
@@ -72,6 +262,72 @@ class ChatPage extends Block<ChatPageProps> {
       this.clearRemoveUserLoginError();
       return;
     }
+    if (action === 'change-avatar') {
+      this.openModal('changeAvatarModal');
+      return;
+    }
+    if (action === 'delete-chat') {
+      void this.handleDeleteChat();
+      return;
+    }
+  };
+
+  private handleDeleteChat = async (): Promise<void> => {
+    const chatId = this.props.activeChat?.id;
+    if (typeof chatId !== 'number') return;
+
+    const confirmed = window.confirm('Удалить этот чат?');
+    if (!confirmed) return;
+
+    try {
+      await this.chatAPI.deleteChat(chatId);
+      this.chatSocket.close();
+      this.socketChatId = null;
+      this.lastFetchedChatId = null;
+
+      const state = store.getState();
+      const messagesMap =
+        state.messages && typeof state.messages === 'object'
+          ? { ...(state.messages as Record<string, unknown>) }
+          : {};
+      delete messagesMap[String(chatId)];
+      store.setState('messages', messagesMap);
+
+      const usersMap =
+        state.chatUsers && typeof state.chatUsers === 'object'
+          ? { ...(state.chatUsers as Record<string, unknown>) }
+          : {};
+      delete usersMap[String(chatId)];
+      store.setState('chatUsers', usersMap);
+
+      store.setState('selectedChatId', null);
+
+      const list = await this.chatAPI.getChats();
+      store.setState('chats', parseChatsResponse(list));
+    } catch (err) {
+      window.alert('Произошла ошибка при удалении чата');
+      console.log('err', err);
+    }
+  };
+
+  private handleChangeAvatarSubmit = (file: File): Promise<unknown> => {
+    const chatId = this.props.activeChat?.id;
+    if (typeof chatId !== 'number') {
+      return Promise.reject(new Error('no active chat'));
+    }
+    const formData = new FormData();
+    formData.append('chatId', String(chatId));
+    formData.append('avatar', file);
+    return this.chatAPI.changeChatsAvatar(formData)
+      .then(() => this.chatAPI.getChats())
+      .then((list) => {
+        store.setState('chats', parseChatsResponse(list));
+      })
+      .catch((err) => {
+        window.alert('Произошла ошибка при смене аватара чата');
+        console.log('err', err);
+        throw err;
+      });
   };
 
   private handleAttachMenuSelect = (action: string): void => {
@@ -268,6 +524,8 @@ class ChatPage extends Block<ChatPageProps> {
       window.clearTimeout(this.searchDebounceTimer);
       this.searchDebounceTimer = null;
     }
+    document.removeEventListener('click', this.handleParticipantsOutsideClick, true);
+    document.removeEventListener('keydown', this.handleParticipantsEscape);
   }
 
   /** Подтягивает участников выбранного чата, если они ещё не в сторе. */
@@ -377,9 +635,21 @@ class ChatPage extends Block<ChatPageProps> {
         this.openModal('createChatModal');
         return;
       }
+      if (target.closest('.chat-page__dialog-participants')) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.isParticipantsOpen) {
+          this.closeParticipants();
+        } else {
+          this.openParticipants();
+        }
+        return;
+      }
       if (target.closest('.chat-page__profile-link')) {
         e.preventDefault();
+        this.chatSocket.close();
         this.props.onNavigate?.('settings');
+        return;
       }
     },
     focusin: (e: Event) => {
@@ -406,14 +676,21 @@ class ChatPage extends Block<ChatPageProps> {
       const input = form.querySelector<HTMLInputElement>('input[name="message"]');
       if (!input) return;
 
-      const error = validateField('message', input.value);
+      const value = input.value;
+      const error = validateField('message', value);
       if (error) {
         input.classList.add('chat-page__compose-input--error');
         return;
       }
 
       input.classList.remove('chat-page__compose-input--error');
-      form.reset();
+
+      const text = value.trim();
+      if (!text) return;
+      if (this.chatSocket.getReadyState() !== WebSocket.OPEN) return;
+
+      this.chatSocket.sendJson({ type: 'message', content: text });
+      input.value = '';
     },
   };
 
@@ -476,7 +753,29 @@ class ChatPage extends Block<ChatPageProps> {
               {{/if}}
             </div>
             {{#if activeChat.participantsCount}}
-              <p class="chat-page__dialog-participants">Участников: {{activeChat.participantsCount}}</p>
+              <div class="chat-page__participants">
+                <button
+                  type="button"
+                  class="chat-page__dialog-participants"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  Участников: {{activeChat.participantsCount}}
+                </button>
+                {{#if activeChat.participants}}
+                  <div class="chat-page__participants-popover" role="dialog" aria-label="Участники чата" hidden>
+                    <ul class="chat-page__participants-list" role="list">
+                      {{#each activeChat.participants}}
+                        <li class="chat-page__participants-item">
+                          <span class="chat-page__participants-name">{{name}}</span>
+                          <span class="chat-page__participants-login">@{{login}}</span>
+                          <span class="chat-page__participants-id">ID: {{id}}</span>
+                        </li>
+                      {{/each}}
+                    </ul>
+                  </div>
+                {{/if}}
+              </div>
             {{/if}}
             {{DropdownMenu items=menuItems onSelect=onMenuSelect}}
           </header>
@@ -550,6 +849,17 @@ class ChatPage extends Block<ChatPageProps> {
         fields=createChatFields
         submitLabel="Подтвердить"
         onSubmit=onCreateChatSubmit
+      }}
+
+      {{Modal
+        ref="changeAvatarModal"
+        title="Загрузите файл"
+        isFileUpload=true
+        fileFieldName="avatar"
+        fileAccept="image/*"
+        filePickLabel="Выбрать файл на компьютере"
+        submitLabel="Поменять"
+        onFileSubmit=onChangeAvatarSubmit
       }}
     </div>
   `;

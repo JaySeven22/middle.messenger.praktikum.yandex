@@ -15,6 +15,7 @@ $dm-panel-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     border: none;
     cursor: pointer;
     padding: 8px;
+    width: 36px;
     border-radius: 50%;
     color: $dm-text;
     display: inline-flex;
@@ -131,8 +132,8 @@ $dm-panel-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
     background: transparent;
 
-    &::before,
-    &::after {
+    &--add::before,
+    &--add::after {
       content: '';
       position: absolute;
       background: currentColor;
@@ -154,22 +155,13 @@ $dm-panel-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       width: 1px;
       transform: translateX(-50%);
     }
+  }
 
-    &--remove::before,
-    &--remove::after {
-      top: 50%;
-      left: 26%;
-      right: 26%;
-      height: 1px;
-    }
-
-    &--remove::before {
-      transform: translateY(-50%) rotate(45deg);
-    }
-
-    &--remove::after {
-      transform: translateY(-50%) rotate(-45deg);
-    }
+  &__item-icon-svg {
+    display: block;
+    width: 12px;
+    height: 12px;
+    object-fit: contain;
   }
 
   &__item-icon-img {

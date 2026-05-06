@@ -58,7 +58,11 @@ export default class DropdownMenu extends Block<DropdownMenuProps> {
                 <img class="dropdown-menu__item-icon-img" src="{{iconSrc}}" alt="" aria-hidden="true" />
               {{else}}
                 {{#if icon}}
-                  <span class="dropdown-menu__item-icon dropdown-menu__item-icon--{{icon}}" aria-hidden="true"></span>
+                  <span class="dropdown-menu__item-icon dropdown-menu__item-icon--{{icon}}" aria-hidden="true">
+                    {{#if (eq icon 'remove')}}
+                      <img class="dropdown-menu__item-icon-svg" src="/close.svg" alt="" aria-hidden="true" />
+                    {{/if}}
+                  </span>
                 {{/if}}
               {{/if}}
               {{label}}
