@@ -99,6 +99,17 @@ class NotFoundRoute extends ErrorPage {
   }
 }
 
+class ServerErrorRoute extends ErrorPage {
+  constructor() {
+    super({
+      code: 500,
+      message: 'Мы уже фиксим',
+      linkText: 'Назад к чатам',
+      onNavigate: navigate,
+    });
+  }
+}
+
 export function initRouter(): void {
   routerInstance = new Router('#app');
 
@@ -110,8 +121,14 @@ export function initRouter(): void {
     .use('/settings', ProfileRoute as unknown as RouteBlockConstructor)
     .use('/settingsEdit', ProfileEditRoute as unknown as RouteBlockConstructor)
     .use('/passwordEdit', PasswordEditRoute as unknown as RouteBlockConstructor)
+    .use('/500', ServerErrorRoute)
     .useFallback(NotFoundRoute);
-    
+
+  window.addEventListener('api:server-error', () => {
+    if (window.location.pathname !== '/500') {
+      routerInstance?.go('/500');
+    }
+  });
 
   routerInstance.start();
 }
