@@ -117,16 +117,84 @@ $primary: #3369F3;
     box-sizing: border-box;
   }
 
-  &__dialog-participants {
+  &__participants {
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+  }
+
+  &__dialog-participants {
     margin: 0;
+    padding: 4px 8px;
+    border: none;
+    background: none;
+    font: inherit;
     font-size: 0.8125rem;
     color: $text-secondary;
     white-space: nowrap;
-    pointer-events: none;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.15s, color 0.15s;
+
+    &:hover,
+    &[aria-expanded="true"] {
+      background-color: rgba(51, 105, 243, 0.08);
+      color: $primary;
+    }
+  }
+
+  &__participants-popover {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    min-width: 240px;
+    max-width: 320px;
+    max-height: 320px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid $border-color;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  &__participants-list {
+    list-style: none;
+    margin: 0;
+    padding: 4px 0;
+  }
+
+  &__participants-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 12px;
+
+    & + & {
+      border-top: 1px solid $border-color;
+    }
+  }
+
+  &__participants-name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  &__participants-login {
+    font-size: 0.75rem;
+    color: $text-secondary;
+  }
+
+  &__participants-id {
+    font-size: 0.6875rem;
+    color: $text-secondary;
   }
 
   &__dialog-user {

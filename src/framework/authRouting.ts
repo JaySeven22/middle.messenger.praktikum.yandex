@@ -36,6 +36,11 @@ const PUBLIC_PATHS = ['/', '/sign-up'] as const;
 export function authRouteMiddleware(pathname: string): string | null {
   const path = pathname || '/';
 
+  // Технические страницы ошибок доступны всем — без редиректов.
+  if (path === '/500' || path === '/404') {
+    return null;
+  }
+
   if (path === '/register') {
     return '/sign-up';
   }
@@ -50,7 +55,7 @@ export function authRouteMiddleware(pathname: string): string | null {
   }
 
   if ((PUBLIC_PATHS as readonly string[]).includes(path)) {
-    return '/chat';
+    return '/messenger';
   }
 
   return null;

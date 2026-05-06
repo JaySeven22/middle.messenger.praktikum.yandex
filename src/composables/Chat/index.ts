@@ -1,6 +1,8 @@
 export { parseChatsResponse } from './parseChatsResponse';
 export { parseUserSearchResponse } from './parseUserSearchResponse';
 export { parseChatUsersResponse } from './parseChatUsersResponse';
+export { parseChatMessagesResponse } from './parseChatMessagesResponse';
+export { buildChatMessagesView } from './buildChatMessagesView';
 export { formatMessageTime } from './formatMessageTime';
 export { displayNameFromUser } from './displayNameFromUser';
 export { mapChatsToSidebarItems } from './mapChatsToSidebarItems';

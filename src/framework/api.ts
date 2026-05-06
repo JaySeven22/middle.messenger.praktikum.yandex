@@ -138,6 +138,11 @@ class HTTPTransport {
   
           resolve(response);
         } else {
+          if (xhr.status >= 500) {
+            window.dispatchEvent(new CustomEvent('api:server-error', {
+              detail: { status: xhr.status }
+            }));
+          }
           reject({
             status: xhr.status,
             statusText: xhr.statusText,
@@ -152,10 +157,15 @@ class HTTPTransport {
         request: xhr
       });
         
-      xhr.onerror = () => reject({
-        reason: 'Network error',
-        request: xhr
-      });
+      xhr.onerror = () => {
+        window.dispatchEvent(new CustomEvent('api:server-error', {
+          detail: { status: 0 }
+        }));
+        reject({
+          reason: 'Network error',
+          request: xhr
+        });
+      };
         
       xhr.timeout = timeout;
         
