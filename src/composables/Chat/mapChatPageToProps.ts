@@ -1,9 +1,11 @@
 import type { Indexed } from '../../utils/merge';
-import type { ChatSidebarItem } from '../../entities/Chat';
+import type { ChatSidebarItem, ChatMessageRaw } from '../../entities/Chat';
 import { resolveAvatar } from '../User';
 import { parseChatsResponse } from './parseChatsResponse';
 import { parseUserSearchResponse } from './parseUserSearchResponse';
 import { parseChatUsersResponse } from './parseChatUsersResponse';
+import { buildChatMessagesView } from './buildChatMessagesView';
+import { displayNameFromUser } from './displayNameFromUser';
 import { mapChatsToSidebarItems } from './mapChatsToSidebarItems';
 import { mapSearchUsersToSidebarItems } from './mapSearchUsersToSidebarItems';
 
@@ -54,19 +56,38 @@ export function mapChatPageToProps(state: Indexed): Indexed {
     selectedChatId !== undefined ? chatUsersMap[String(selectedChatId)] : undefined;
   const participants = parseChatUsersResponse(participantsRaw);
 
+  const messagesMap =
+    state.messages && typeof state.messages === 'object'
+      ? (state.messages as Record<string, unknown>)
+      : {};
+  const messagesRawForChat: ChatMessageRaw[] =
+    selectedChatId !== undefined && Array.isArray(messagesMap[String(selectedChatId)])
+      ? (messagesMap[String(selectedChatId)] as ChatMessageRaw[])
+      : [];
+
+  const currentUser = state.user as Indexed | null | undefined;
+  const currentUserId =
+    currentUser && typeof currentUser.id === 'number' ? currentUser.id : null;
+
+  const messagesView = buildChatMessagesView(messagesRawForChat, currentUserId);
+
+  const participantsView =
+    participants.length > 0
+      ? participants.map((u) => ({
+          id: u.id,
+          name: displayNameFromUser(u),
+          login: u.login,
+        }))
+      : undefined;
+
   const activeChat = active
     ? {
         id: active.id,
         name: active.title,
         ...(active.avatar ? { avatar: resolveAvatar(active.avatar) } : {}),
         ...(participants.length > 0 ? { participantsCount: participants.length } : {}),
-        messages: [] as {
-          dateSeparator?: string;
-          text?: string;
-          time?: string;
-          isOwn?: boolean;
-          image?: string;
-        }[],
+        ...(participantsView ? { participants: participantsView } : {}),
+        messages: messagesView,
       }
     : undefined;
 

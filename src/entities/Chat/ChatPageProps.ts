@@ -19,6 +19,11 @@ export type ChatPageProps = BlockOwnProps & {
     name: string;
     avatar?: string;
     participantsCount?: number;
+    participants?: {
+      id: number;
+      name: string;
+      login: string;
+    }[];
     messages: {
       dateSeparator?: string;
       text?: string;
