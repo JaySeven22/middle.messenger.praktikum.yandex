@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import '../../framework/helpers';
-import SearchInput from '../SearchInput/searchInput.tmpl';
+import SearchInput from './searchInput.tmpl';
 
 describe('SearchInput', () => {
   beforeEach(() => {

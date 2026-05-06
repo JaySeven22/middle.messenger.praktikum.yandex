@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import Block, { type BlockOwnProps } from '../block';
+import Block, { type BlockOwnProps } from './block';
 
 class SimpleBlock extends Block<BlockOwnProps & { label?: string }> {
   protected template = '<button class="btn">{{label}}</button>';

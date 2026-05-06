@@ -42,6 +42,7 @@ export type ChatPageProps = BlockOwnProps & {
   onRemoveUserSubmit?: (values: Record<string, string>) => void;
   createChatFields?: ModalField[];
   onCreateChatSubmit?: (values: Record<string, string>) => void;
+  onChangeAvatarSubmit?: (file: File) => Promise<unknown> | unknown | void;
   onNavigate?: (page: string) => void;
   userSearchInput?: string;
 };

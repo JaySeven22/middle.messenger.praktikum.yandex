@@ -23,6 +23,8 @@ import type { Indexed } from '../../utils/merge';
 const DEFAULT_MENU_ITEMS: DropdownMenuItem[] = [
   { label: 'Добавить пользователя', action: 'add-user', icon: 'add' },
   { label: 'Удалить пользователя', action: 'remove-user', icon: 'remove' },
+  { label: 'Сменить аватар чата', action: 'change-avatar', iconSrc: '/media.svg' },
+  { label: 'Удалить чат', action: 'delete-chat', icon: 'remove', danger: true },
 ];
 
 const DEFAULT_ATTACH_MENU_ITEMS: DropdownMenuItem[] = [
@@ -74,6 +76,7 @@ class ChatPage extends Block<ChatPageProps> {
     this.props.onAddUserSubmit ??= this.handleAddUserSubmit;
     this.props.onRemoveUserSubmit ??= this.handleRemoveUserSubmit;
     this.props.onCreateChatSubmit ??= this.handleCreateChatSubmit;
+    this.props.onChangeAvatarSubmit ??= this.handleChangeAvatarSubmit;
   }
 
   public setProps(next: Partial<ChatPageProps>): void {
@@ -259,6 +262,72 @@ class ChatPage extends Block<ChatPageProps> {
       this.clearRemoveUserLoginError();
       return;
     }
+    if (action === 'change-avatar') {
+      this.openModal('changeAvatarModal');
+      return;
+    }
+    if (action === 'delete-chat') {
+      void this.handleDeleteChat();
+      return;
+    }
+  };
+
+  private handleDeleteChat = async (): Promise<void> => {
+    const chatId = this.props.activeChat?.id;
+    if (typeof chatId !== 'number') return;
+
+    const confirmed = window.confirm('Удалить этот чат?');
+    if (!confirmed) return;
+
+    try {
+      await this.chatAPI.deleteChat(chatId);
+      this.chatSocket.close();
+      this.socketChatId = null;
+      this.lastFetchedChatId = null;
+
+      const state = store.getState();
+      const messagesMap =
+        state.messages && typeof state.messages === 'object'
+          ? { ...(state.messages as Record<string, unknown>) }
+          : {};
+      delete messagesMap[String(chatId)];
+      store.setState('messages', messagesMap);
+
+      const usersMap =
+        state.chatUsers && typeof state.chatUsers === 'object'
+          ? { ...(state.chatUsers as Record<string, unknown>) }
+          : {};
+      delete usersMap[String(chatId)];
+      store.setState('chatUsers', usersMap);
+
+      store.setState('selectedChatId', null);
+
+      const list = await this.chatAPI.getChats();
+      store.setState('chats', parseChatsResponse(list));
+    } catch (err) {
+      window.alert('Произошла ошибка при удалении чата');
+      console.log('err', err);
+    }
+  };
+
+  private handleChangeAvatarSubmit = (file: File): Promise<unknown> => {
+    const chatId = this.props.activeChat?.id;
+    if (typeof chatId !== 'number') {
+      return Promise.reject(new Error('no active chat'));
+    }
+    const formData = new FormData();
+    formData.append('chatId', String(chatId));
+    formData.append('avatar', file);
+    return this.chatAPI.changeChatsAvatar(formData)
+      .then(() => this.chatAPI.getChats())
+      .then((list) => {
+        store.setState('chats', parseChatsResponse(list));
+      })
+      .catch((err) => {
+        window.alert('Произошла ошибка при смене аватара чата');
+        console.log('err', err);
+        throw err;
+      });
   };
 
   private handleAttachMenuSelect = (action: string): void => {
@@ -780,6 +849,17 @@ class ChatPage extends Block<ChatPageProps> {
         fields=createChatFields
         submitLabel="Подтвердить"
         onSubmit=onCreateChatSubmit
+      }}
+
+      {{Modal
+        ref="changeAvatarModal"
+        title="Загрузите файл"
+        isFileUpload=true
+        fileFieldName="avatar"
+        fileAccept="image/*"
+        filePickLabel="Выбрать файл на компьютере"
+        submitLabel="Поменять"
+        onFileSubmit=onChangeAvatarSubmit
       }}
     </div>
   `;

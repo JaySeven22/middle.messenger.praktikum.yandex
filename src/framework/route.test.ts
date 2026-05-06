@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import Block from '../block';
-import Route from '../route';
+import Block from './block';
+import Route from './route';
 
 class StubBlock extends Block {
   protected template = '<div data-route-stub="1"></div>';

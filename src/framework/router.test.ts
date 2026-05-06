@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import Block from '../block.js';
+import Block from './block.js';
 
 class PageLogin extends Block {
   protected template = '<div id="page-login"></div>';
@@ -27,7 +27,7 @@ describe('Router', () => {
   });
 
   async function loadRouter() {
-    const mod = await import('../router.js');
+    const mod = await import('./router.js');
     return mod.default;
   }
 
@@ -92,7 +92,7 @@ describe('Router', () => {
 
   it('при смене маршрута у предыдущего вызывается leave', async () => {
     const Router = await loadRouter();
-    const RouteMod = await import('../route.js');
+    const RouteMod = await import('./route.js');
     const leaveSpy = jest.spyOn(RouteMod.default.prototype, 'leave');
 
     const router = new Router(rootQuery);

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
-import Input from '../Input/input.tmpl';
+import Input from './input.tmpl';
 
 describe('Input', () => {
   beforeEach(() => {

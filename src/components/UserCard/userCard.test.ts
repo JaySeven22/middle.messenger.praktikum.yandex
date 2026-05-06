@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import '../../framework/helpers';
-import UserCard from '../UserCard/userCard.tmpl';
+import UserCard from './userCard.tmpl';
 
 describe('UserCard', () => {
   beforeEach(() => {

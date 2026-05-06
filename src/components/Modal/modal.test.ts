@@ -1,9 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import '../../framework/helpers';
-// Регистрируем компоненты Input/Button как Handlebars-хелперы — они используются в шаблоне Modal.
 import '../Input';
 import '../Button';
-import Modal from '../Modal/modal.tmpl';
+import Modal from './modal.tmpl';
 
 function mount(modal: Modal): HTMLElement {
   const el = modal.element() as HTMLElement;

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import Button from '../Button/button.tmpl';
+import Button from './button.tmpl';
 
 describe('Button', () => {
   beforeEach(() => {

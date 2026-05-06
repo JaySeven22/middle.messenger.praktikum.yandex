@@ -21,7 +21,7 @@ type MockXhr = {
 function createMockXhr(overrides: Partial<Pick<MockXhr, 'status' | 'statusText' | 'responseText' | 'response' | 'responseType'>> = {}): MockXhr {
   const xhr: MockXhr = {
     open: jest.fn(),
-    send: jest.fn((..._args: unknown[]) => {
+    send: jest.fn(() => {
       queueMicrotask(() => {
         if (xhr.onload) {
           xhr.onload.call(xhr as unknown as XMLHttpRequest, {} as ProgressEvent);
@@ -62,12 +62,12 @@ describe('HTTPTransport', () => {
 
   async function loadHTTPTransport() {
     jest.resetModules();
-    await jest.unstable_mockModule('../env.js', () => ({
+    await jest.unstable_mockModule('./env.js', () => ({
       API_HOST: 'https://api.test',
       RESOURCES_BASE: 'https://api.test/resources',
       WS_ORIGIN: 'wss://api.test',
     }));
-    const mod = await import('../api.js');
+    const mod = await import('./api.js');
     return mod.default;
   }
 

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import '../../framework/helpers';
-import Avatar from '../Avatar/avatar.tmpl';
+import Avatar from './avatar.tmpl';
 
 describe('Avatar', () => {
   beforeEach(() => {

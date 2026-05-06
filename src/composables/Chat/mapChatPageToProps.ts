@@ -39,10 +39,16 @@ export function mapChatPageToProps(state: Indexed): Indexed {
   const searchInput = (state.userSearchInput as string | undefined) ?? '';
   const searchTrimmed = searchInput.trim();
 
-  const users: ChatSidebarItem[] =
-    searchTrimmed.length > 0
-      ? mapSearchUsersToSidebarItems(parseUserSearchResponse(state.users))
-      : mapChatsToSidebarItems(chats, selectedChatId);
+  let users: ChatSidebarItem[];
+  if (searchTrimmed.length > 0) {
+    const query = searchTrimmed.toLowerCase();
+    const matchedChats = chats.filter((c) => c.title.toLowerCase().includes(query));
+    const matchedChatItems = mapChatsToSidebarItems(matchedChats, selectedChatId);
+    const userResultItems = mapSearchUsersToSidebarItems(parseUserSearchResponse(state.users));
+    users = [...matchedChatItems, ...userResultItems];
+  } else {
+    users = mapChatsToSidebarItems(chats, selectedChatId);
+  }
   const active =
     selectedChatId !== undefined
       ? chats.find((c) => c.id === selectedChatId)
